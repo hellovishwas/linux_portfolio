@@ -6,7 +6,9 @@ YELLOW='\033[1;33m'
 RED='\033[0;31m'
 NC='\033[0m'
 
-CONFIG_FILE="./config.conf"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+CONFIG_FILE="$SCRIPT_DIR/config.conf"
+SNAPSHOT_DIR="$SCRIPT_DIR/../snapshots"
 
 if [ -f "$CONFIG_FILE" ]; then
     source "$CONFIG_FILE"
@@ -125,27 +127,26 @@ show_help() {
 }
 
 save_snapshot() {
-    mkdir -p snapshots
+    mkdir -p "$SNAPSHOT_DIR"
 
-    local timestamp=$(date +"%Y-%m-%d_%H-%M-%S")
-    local filename="snapshots/snapshot_${timestamp}.txt"
+    local timestamp
+    timestamp=$(date +"%Y-%m-%d_%H-%M-%S")
 
-    show_dashboard > "$filename"show_dashboard > "$filename"
-    local dashboard_status=$?
+    local filename="$SNAPSHOT_DIR/snapshot_${timestamp}.txt"
+
+    show_dashboard > "$filename"
 
     echo "Snapshot saved: $filename"
-
-    return 0
 }
 
 show_history() {
     echo ""
     echo -e "${CYAN}┌──────────── SNAPSHOT HISTORY ─────────────┐${NC}"
 
-    if [ ! -d "snapshots" ] || [ -z "$(ls -A snapshots 2>/dev/null)" ]; then
+    if [ ! -d "$SNAPSHOT_DIR" ] || [ -z "$(ls -A "$SNAPSHOT_DIR" 2>/dev/null)" ]; then
         echo "│ No snapshots found."
     else
-        ls -1t snapshots | nl -w2 -s'. '
+        ls -1t "$SNAPSHOT_DIR" | nl -w2 -s'. '
     fi
 
     echo -e "${CYAN}└────────────────────────────────────────────┘${NC}"
@@ -155,7 +156,7 @@ view_snapshot() {
     local snapshot="$1"
 
     if [ "$snapshot" = "latest" ]; then
-        snapshot=$(ls -1t snapshots 2>/dev/null | head -n1)
+        snapshot=$(ls -1t "$SNAPSHOT_DIR" 2>/dev/null | head -n1)
     fi
 
     if [ -z "$snapshot" ]; then
@@ -163,14 +164,14 @@ view_snapshot() {
         exit 1
     fi
 
-    if [ ! -f "snapshots/$snapshot" ]; then
+    if [ ! -f "$SNAPSHOT_DIR/$snapshot" ]; then
         echo "Snapshot not found: $snapshot"
         exit 1
     fi
 
     echo ""
     echo -e "${CYAN}┌──────────── SNAPSHOT ────────────┐${NC}"
-    cat "snapshots/$snapshot"
+    cat "$SNAPSHOT_DIR/$snapshot"
     echo -e "${CYAN}└──────────────────────────────────┘${NC}"
 }
 
@@ -178,12 +179,22 @@ extract_value() {
     local file="$1"
     local metric="$2"
 
-    grep "$metric" "$file" | grep -oE '[0-9]+(\.[0-9]+)?%' | head -n1 | tr -d '%'
+    case "$metric" in
+        CPU)
+            sed -n 's/.*CPU  :.*\([0-9][0-9.]*\)%.*/\1/p' "$file" | head -n1
+            ;;
+        RAM)
+            sed -n 's/.*RAM  :.*\([0-9][0-9.]*\)%.*/\1/p' "$file" | head -n1
+            ;;
+        DISK)
+            sed -n 's/.*DISK :.*\([0-9][0-9.]*\)%.*/\1/p' "$file" | head -n1
+            ;;
+    esac
 }
 
 compare_snapshots() {
     local snapshots_list
-    snapshots_list=$(ls -1t snapshots 2>/dev/null | head -n2)
+    snapshots_list=$(ls -1t "$SNAPSHOT_DIR" 2>/dev/null | head -n2)
 
     local latest
     local previous
@@ -196,32 +207,40 @@ compare_snapshots() {
         exit 1
     fi
 
-    local latest_cpu
-    local previous_cpu
-    local latest_ram
-    local previous_ram
-    local latest_disk
-    local previous_disk
+    local latest_cpu previous_cpu
+    local latest_ram previous_ram
+    local latest_disk previous_disk
 
-    latest_cpu=$(extract_value "snapshots/$latest" "CPU")
-    previous_cpu=$(extract_value "snapshots/$previous" "CPU")
+    latest_cpu=$(extract_value "$SNAPSHOT_DIR/$latest" "CPU")
+    previous_cpu=$(extract_value "$SNAPSHOT_DIR/$previous" "CPU")
 
-    latest_ram=$(extract_value "snapshots/$latest" "RAM")
-    previous_ram=$(extract_value "snapshots/$previous" "RAM")
+    latest_ram=$(extract_value "$SNAPSHOT_DIR/$latest" "RAM")
+    previous_ram=$(extract_value "$SNAPSHOT_DIR/$previous" "RAM")
 
-    latest_disk=$(extract_value "snapshots/$latest" "DISK")
-    previous_disk=$(extract_value "snapshots/$previous" "DISK")
+    latest_disk=$(extract_value "$SNAPSHOT_DIR/$latest" "DISK")
+    previous_disk=$(extract_value "$SNAPSHOT_DIR/$previous" "DISK")
 
-    local cpu_change
-    local ram_change
-    local disk_change
+    if [ -z "$latest_cpu" ] || [ -z "$previous_cpu" ] ||
+       [ -z "$latest_ram" ] || [ -z "$previous_ram" ] ||
+       [ -z "$latest_disk" ] || [ -z "$previous_disk" ]; then
+        echo "Error: Could not read metric values from snapshots."
+        exit 1
+    fi
+
+    local cpu_change ram_change disk_change
 
     cpu_change=$(echo "$latest_cpu - $previous_cpu" | bc)
     ram_change=$(echo "$latest_ram - $previous_ram" | bc)
     disk_change=$(echo "$latest_disk - $previous_disk" | bc)
-	local CPU_CHANGE=$(get_change_indicator "$cpu_change")
-    local RAM_CHANGE=$(get_change_indicator "$ram_change")
-    local DISK_CHANGE=$(get_change_indicator "$disk_change")
+
+    local CPU_CHANGE
+    local RAM_CHANGE
+    local DISK_CHANGE
+
+    CPU_CHANGE=$(get_change_indicator "$cpu_change")
+    RAM_CHANGE=$(get_change_indicator "$ram_change")
+    DISK_CHANGE=$(get_change_indicator "$disk_change")
+
     echo ""
     echo -e "${CYAN}┌──────────── SNAPSHOT COMPARISON ─────────────┐${NC}"
     echo -e "${CYAN}│${NC}             OLD       CURRENT       CHANGE"

@@ -77,13 +77,13 @@ Example:
 Continuously refreshes the dashboard directly in the terminal.
 
 ```bash
-./monitor.sh --live
+./scripts/monitor.sh --live
 ```
 
 Custom refresh interval:
 
 ```bash
-./monitor.sh --live 5
+./scripts/monitor.sh --live 5
 ```
 
 ### 💾 Snapshot System
@@ -91,7 +91,7 @@ Custom refresh interval:
 Save the current system state:
 
 ```bash
-./monitor.sh --save
+./scripts/monitor.sh --save
 ```
 
 Snapshots are stored with timestamps:
@@ -108,7 +108,7 @@ snapshots/
 View previously saved snapshots:
 
 ```bash
-./monitor.sh --history
+./scripts/monitor.sh --history
 ```
 
 ### 👁️ View Snapshots
@@ -116,13 +116,13 @@ View previously saved snapshots:
 View the latest snapshot:
 
 ```bash
-./monitor.sh --view
+./scripts/monitor.sh --view
 ```
 
 View a specific snapshot:
 
 ```bash
-./monitor.sh --view snapshot_2026-08-30_14-10-28.txt
+./scripts/monitor.sh --view snapshot_2026-08-30_14-10-28.txt
 ```
 
 ### 🔀 Snapshot Comparison
@@ -130,7 +130,7 @@ View a specific snapshot:
 Compare the latest two snapshots:
 
 ```bash
-./monitor.sh --compare
+./scripts/monitor.sh --compare
 ```
 
 Example:
@@ -172,7 +172,7 @@ This allows other scripts or automation tools to use the monitor's result.
 Display available commands:
 
 ```bash
-./monitor.sh --help
+./scripts/monitor.sh --help
 ```
 
 ---
@@ -212,8 +212,8 @@ linux-system-monitor/
 
 | File / Directory | Purpose                                       |
 | ---------------- | --------------------------------------------- |
-| `monitor.sh`     | Main monitoring script                        |
-| `config.conf`    | Monitoring configuration                      |
+| `scripts/monitor.sh` | Main monitoring script                     |
+| `scripts/config.conf` | Monitoring configuration                 |
 | `snapshots/`     | Stores system snapshots                       |
 | `logs/`          | Reserved for monitoring logs                  |
 | `scripts/`       | Supporting scripts                            |
@@ -253,7 +253,7 @@ sudo apt install bc
 ### 5. Run the monitor
 
 ```bash
-./monitor.sh
+./scripts/monitor.sh
 ```
 
 ---
@@ -263,7 +263,7 @@ sudo apt install bc
 ### Default Dashboard
 
 ```bash
-./monitor.sh
+./scripts/monitor.sh
 ```
 
 Displays a one-time system snapshot.
@@ -271,7 +271,7 @@ Displays a one-time system snapshot.
 ### Live Monitoring
 
 ```bash
-./monitor.sh --live
+./scripts/monitor.sh --live
 ```
 
 Default refresh interval:
@@ -283,43 +283,43 @@ Default refresh interval:
 Custom interval:
 
 ```bash
-./monitor.sh --live 5
+./scripts/monitor.sh --live 5
 ```
 
 ### Save Snapshot
 
 ```bash
-./monitor.sh --save
+./scripts/monitor.sh --save
 ```
 
 ### Snapshot History
 
 ```bash
-./monitor.sh --history
+./scripts/monitor.sh --history
 ```
 
 ### View Latest Snapshot
 
 ```bash
-./monitor.sh --view
+./scripts/monitor.sh --view
 ```
 
 ### View Specific Snapshot
 
 ```bash
-./monitor.sh --view snapshot_FILENAME.txt
+./scripts/monitor.sh --view snapshot_FILENAME.txt
 ```
 
 ### Compare Snapshots
 
 ```bash
-./monitor.sh --compare
+./scripts/monitor.sh --compare
 ```
 
 ### Help
 
 ```bash
-./monitor.sh --help
+./scripts/monitor.sh --help
 ```
 
 ---
@@ -458,27 +458,27 @@ bash -n monitor.sh
 Run the dashboard:
 
 ```bash
-./monitor.sh
+./scripts/monitor.sh
 ```
 
 Test live monitoring:
 
 ```bash
-./monitor.sh --live 5
+./scripts/monitor.sh --live 5
 ```
 
 Test snapshot functionality:
 
 ```bash
-./monitor.sh --save
-./monitor.sh --history
-./monitor.sh --view
+./scripts/monitor.sh --save
+./scripts/monitor.sh --history
+./scripts/monitor.sh --view
 ```
 
 Test comparison:
 
 ```bash
-./monitor.sh --compare
+./scripts/monitor.sh --compare
 ```
 
 ---

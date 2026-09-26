@@ -272,7 +272,7 @@ show_dashboard(){
 	echo -e "${CYAN}╔════════════════════════════════════════════╗${NC}"
 	echo -e "${CYAN}║          LINUX SYSTEM MONITOR              ║${NC}"
 	echo -e "${CYAN}║             SYSTEM DASHBOARD               ║${NC}"
-    echo -e "${CYAN}║     Snapshot: $(date '+%Y-%m-%d %H:%M:%S') UTC      ║${NC}"
+    echo -e "${CYAN}║     Snapshot: $(date -u '+%Y-%m-%d %H:%M:%S') UTC      ║${NC}"
 	echo -e "${CYAN}╚════════════════════════════════════════════╝${NC}"
 
 
